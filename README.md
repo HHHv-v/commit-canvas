@@ -1,14 +1,59 @@
-# Commit Canvas 🎨
+<a href="https://hhhv-v.github.io/commit-canvas/"><img src="docs/readme/hero.svg" alt="Commit Canvas — 내 1년의 GitHub 기여가 한 점의 그림이 됐어요" width="100%"></a>
 
-1년치 GitHub 기여를 **흐르는 데이터 페인팅**으로 그려주는 프로필 위젯이에요.
-기여 하나하나가 입자가 되어 유체처럼 흐르며 한 점의 그림을 만들어요. 같은 그림은 하나도 없어요.
+<p>
+  <a href="https://hhhv-v.github.io/commit-canvas/"><img src="docs/readme/btn-view.svg" alt="내 그림 보기" height="44"></a>
+  <a href="https://hhhv-v.github.io/commit-canvas/"><img src="docs/readme/btn-png.svg" alt="PNG 저장" height="44"></a>
+  <a href="https://hhhv-v.github.io/commit-canvas/"><img src="docs/readme/btn-share.svg" alt="공유하기" height="44"></a>
+  <a href="https://github.com/HHHv-v/commit-canvas/fork"><img src="docs/readme/btn-fork.svg" alt="Fork 하기" height="44"></a>
+</p>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/demo-dark.svg">
-  <img alt="Commit Canvas demo" src="docs/demo-light.svg">
-</picture>
+<a href="https://hhhv-v.github.io/commit-canvas/?user=HHHv-v">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/HHHv-v/commit-canvas/output/commit-canvas-dark.svg">
+    <img alt="@HHHv-v의 Commit Canvas" src="https://raw.githubusercontent.com/HHHv-v/commit-canvas/output/commit-canvas.svg" width="100%">
+  </picture>
+</a>
 
-**[👉 내 그림 보고 공유하기](https://hhhv-v.github.io/commit-canvas/)**
+<sub>↑ 실제 @HHHv-v의 기여로 매일 새로 그려지는 그림이에요.</sub>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 프로필 README에 붙이기
+
+그림을 누르면 공유 페이지로 이어져요. 매일 자정에 새 기여가 반영돼요.
+
+```html
+<a href="https://hhhv-v.github.io/commit-canvas/?user=USER">
+  <picture>
+    <source media="(prefers-color-scheme: dark)"
+      srcset="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas-dark.svg">
+    <img alt="Commit Canvas"
+      src="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas.svg">
+  </picture>
+</a>
+```
+
+`USER`를 내 아이디로 바꿔서 붙여요.
+
+</td>
+<td width="50%" valign="top">
+
+### 내 그림 만들기
+
+아직 그림이 없다면, 1분이면 만들 수 있어요.
+
+1. 이 레포를 [**Fork**](https://github.com/HHHv-v/commit-canvas/fork) 해요.
+2. Fork한 레포의 **Actions** 탭에서 워크플로를 켜요.
+3. **Generate Commit Canvas → Run workflow**를 눌러요.
+4. [공유 페이지](https://hhhv-v.github.io/commit-canvas/)에 내 아이디를 넣어 확인해요.
+
+</td>
+</tr>
+</table>
+
+<br>
 
 ## 그림 규칙
 
@@ -128,23 +173,6 @@ README 이미지 안에서는 JavaScript가 실행되지 않기 때문에, 움�
 
 GitHub Actions가 매일 자정(KST)과 main에 push할 때마다 위 과정을 실행하고, 결과 SVG를 `output` 브랜치에 덮어써요.
 이미지 주소가 항상 같아서, 프로필 README에 한 번만 붙여두면 커밋할수록 그림이 저절로 자라나요.
-
-## 내 프로필에 붙이기
-
-1. 이 레포를 Fork 해요.
-2. Fork한 레포의 **Actions** 탭에서 워크플로를 활성화하고, `Generate Commit Canvas` → **Run workflow**를 눌러요.
-3. 프로필 README에 아래를 붙여요 (`USER`를 내 아이디로).
-
-```html
-<a href="https://hhhv-v.github.io/commit-canvas/?user=USER">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas-dark.svg">
-    <img alt="Commit Canvas" src="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas.svg">
-  </picture>
-</a>
-```
-
-그림을 누르면 공유 페이지로 이어져요.
 
 ## 공유하기
 

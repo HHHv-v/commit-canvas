@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320">
+<defs>
+  <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7C5CFF"/><stop offset="1" stop-color="#FF5C93"/></linearGradient>
+  <linearGradient id="logo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C5CFF"/><stop offset="1" stop-color="#FF5C93"/></linearGradient>
+  <radialGradient id="glowA"><stop offset="0" stop-color="#7C5CFF" stop-opacity=".35"/><stop offset="1" stop-color="#7C5CFF" stop-opacity="0"/></radialGradient>
+  <radialGradient id="glowB"><stop offset="0" stop-color="#FF5C93" stop-opacity=".22"/><stop offset="1" stop-color="#FF5C93" stop-opacity="0"/></radialGradient>
+  <clipPath id="c"><rect width="1200" height="320" rx="24"/></clipPath>
+  <style>text{font-family:Inter,'Segoe UI',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR','Noto Sans CJK KR',sans-serif}</style>
+</defs>
+<g clip-path="url(#c)">
+  <rect width="1200" height="320" fill="#0B0B10"/>
+  <circle cx="1080" cy="-20" r="420" fill="url(#glowA)"/>
+  <circle cx="60" cy="380" r="360" fill="url(#glowB)"/>
+</g>
+<rect x=".5" y=".5" width="1199" height="319" rx="24" fill="none" stroke="#1F1F2A"/>
+<rect x="56" y="48" width="28" height="28" rx="8" fill="url(#logo)"/>
+<text x="96" y="69" font-size="19" font-weight="700" fill="#F5F5FA">Commit Canvas</text>
+<text x="56" y="160" font-size="54" font-weight="800" letter-spacing="-1.6" fill="#F5F5FA">내 1년의 GitHub 기여가</text>
+<text x="56" y="228" font-size="54" font-weight="800" letter-spacing="-1.6" fill="#F5F5FA"><tspan fill="url(#brand)">한 점의 그림</tspan>이 됐어요</text>
+<text x="56" y="276" font-size="18" fill="#9A9AAE">기여 하나하나가 입자가 되어 흐르며 만든 그림이에요. 보고, 저장하고, 공유해 보세요.</text>
+</svg>
