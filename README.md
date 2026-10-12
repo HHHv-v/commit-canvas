@@ -19,7 +19,7 @@ GitHub 기여 1년치를 한 장의 그림으로 그려주는 프로필 위젯.
 3. 프로필 README에 아래를 붙여요. `USER`를 내 아이디로 바꾸면 돼요.
 
 ```html
-<a href="https://hhhv-v.github.io/commit-canvas/?user=USER">
+<a href="https://github.com/HHHv-v/commit-canvas#readme">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas-dark.svg">
     <img alt="Commit Canvas" src="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas.svg">
@@ -27,7 +27,7 @@ GitHub 기여 1년치를 한 장의 그림으로 그려주는 프로필 위젯.
 </a>
 ```
 
-매일 자정(KST)에 새 기여가 반영되고, 그림을 누르면 공유 페이지로 이어져요.
+매일 자정(KST)에 새 기여가 반영되고, 그림을 누르면 Commit Canvas 소개 페이지(이 README)로 이어져서, 보는 사람도 바로 자기 그림을 만들 수 있어요.
 
 ## 그림 규칙
 
@@ -158,7 +158,7 @@ GitHub Actions가 매일 자정(KST)과 main에 push할 때마다 위 과정을 
 | 공유하기 | 모바일에서는 시스템 공유 시트로 이미지와 링크를 함께 보냄. 지원하지 않는 브라우저는 링크 복사 |
 | X · LinkedIn | 문구와 링크가 채워진 게시 화면을 엶 |
 | 링크 복사 | 내 그림 공유 페이지 주소를 복사 |
-| README 코드 복사 | 공유 페이지로 이어지는 프로필 README 코드를 복사 |
+| README 코드 복사 | 그림을 누르면 Commit Canvas README로 이어지는 프로필 코드를 복사 |
 | 테마 전환 | 다크·라이트 그림을 바꿔 봄 |
 
 공유 페이지는 서버 없이 동작해요. 각자의 `output` 브랜치에 있는 SVG를 브라우저가 직접 불러오고, PNG 변환도 브라우저 안에서 해요.
