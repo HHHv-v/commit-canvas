@@ -12,14 +12,26 @@
     · language  : 여러 언어를 고르게 쓰면 언어별 색
     · repo      : 한 언어가 80% 이상이면 레포별 색 (한 언어만 써도 프로젝트는 여러 개)
     · intensity : 레포도 하나뿐이면 그날 기여량에 따라 색이 달라짐
+- 팔레트는 8종 중 아이디로 하나를 고름(--palette), 입자마다 색조를 살짝 비틀어 단조롭지 않게
 - 유체장은 아이디로 시드를 만듦 → 사람마다 다른 그림, 같은 사람은 매일 같은 흐름 위에서 자라남
 """
-import argparse, hashlib, json, math, os, random, urllib.request
+import argparse, colorsys, hashlib, json, math, os, random, urllib.request
 from collections import Counter, defaultdict
 from datetime import date, timedelta
 
 # 많이 쓴 언어부터 순서대로 배정되는 팔레트 (서로 확실히 구분되는 색)
-PALETTE = ["#7C5CFF", "#FF5C93", "#14B8A6", "#F5A524", "#3B82F6", "#FF7A45"]
+# 서로 잘 어울리면서도 구분되는 팔레트 8종. 기본은 아이디로 하나를 고름 → 사람마다 다른 색감
+PALETTES = {
+    "aurora": ["#7C5CFF", "#FF5C93", "#14B8A6", "#F5A524", "#3B82F6", "#FF7A45"],
+    "sunset": ["#FF6B6B", "#FFA94D", "#F06595", "#CC5DE8", "#FFC233", "#845EF7"],
+    "ocean":  ["#228BE6", "#15AABF", "#12B886", "#4C6EF5", "#38D9A9", "#748FFC"],
+    "neon":   ["#00D5F5", "#FF2BD6", "#9BE22D", "#7A5CFF", "#FF8A00", "#00E59B"],
+    "pastel": ["#A78BFA", "#F49AC9", "#4FD1C0", "#F6C944", "#8DB8F8", "#F9A86B"],
+    "forest": ["#2F9E44", "#94C82D", "#E8590C", "#0CA678", "#F59F00", "#5C940D"],
+    "candy":  ["#FF4D8D", "#7048E8", "#20C997", "#FAB005", "#E64980", "#3BC9DB"],
+    "ember":  ["#F03E3E", "#FD7E14", "#FAB005", "#D6336C", "#FF922B", "#C2255C"],
+}
+HUE_SHIFTS = {"a": 0, "b": 14, "c": -14}   # 같은 색 안에서도 입자마다 색조를 살짝 비틂
 OTHER = "Other"
 
 THEMES = {
@@ -133,7 +145,22 @@ def tint(hex_color, amount):
     return f"#{mix(r):02X}{mix(g):02X}{mix(b):02X}"
 
 
-INTENSITY_PALETTE = ["#14B8A6", "#3B82F6", "#7C5CFF", "#FF5C93"]   # 적음 → 많음
+def shift_hue(hex_color, degrees):
+    r, g, b = (int(hex_color[i:i + 2], 16) / 255 for i in (1, 3, 5))
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    r, g, b = colorsys.hls_to_rgb((h + degrees / 360) % 1, l, s)
+    return "#" + "".join(f"{round(c * 255):02X}" for c in (r, g, b))
+
+
+def choose_palette(login, name="auto"):
+    """auto: 아이디로 고정 선택 / random: 실행할 때마다 새로 / 이름: 직접 지정."""
+    if name == "auto":
+        idx = int(hashlib.sha256(("palette:" + login).encode()).hexdigest(), 16) % len(PALETTES)
+        name = list(PALETTES)[idx]
+    elif name == "random":
+        name = random.SystemRandom().choice(list(PALETTES))
+    return name, PALETTES[name]
+
 INTENSITY_LABELS = ["1–2", "3–5", "6–9", "10+"]
 
 
@@ -170,7 +197,7 @@ WIDTHS = [.7, 1.1, 1.6, 2.2]       # 입자 굵기 단계 (CSS 클래스로 재�
 OPACITIES = [.35, .55, .75]        # 입자 투명도 단계
 
 
-def render(login, weeks, theme="dark", color_mode="auto", style="fluid"):
+def render(login, weeks, theme="dark", color_mode="auto", style="fluid", palette_name="auto"):
     t = THEMES[theme]
     W, H = 1200, 560
     ART_X0, ART_X1, ART_Y0, ART_Y1 = 64, 1136, 150, 450
@@ -190,7 +217,7 @@ def render(login, weeks, theme="dark", color_mode="auto", style="fluid"):
         ranked = [k for k in INTENSITY_LABELS if k in key_total]   # 고정 순서
     else:
         ranked = [k for k, _ in key_total.most_common()]
-    palette = INTENSITY_PALETTE if mode == "intensity" else PALETTE
+    palette_name, palette = choose_palette(login, palette_name)
     color_of = {k: palette[i] for i, k in enumerate(ranked[:len(palette)])}
     for k in ranked[len(palette):]:
         color_of[k] = t["other"]
@@ -278,7 +305,8 @@ def render(login, weeks, theme="dark", color_mode="auto", style="fluid"):
             cx = ART_X0 + wi * col_w + col_w / 2 + rng.uniform(-8, 8)
             cy = ART_Y0 + day["weekday"] * row_h + row_h / 2 + rng.uniform(-10, 10)
             key = key_of(day)
-            grad = f"g{ranked.index(key)}" if key in color_of and color_of[key] != t["other"] else "gx"
+            grad = (f"g{ranked.index(key)}{rng.choice('abc')}"
+                    if key in color_of and color_of[key] != t["other"] else "gx")
             delay = wi / n_weeks * 2.4
             if style == "fluid":
                 n = max(2, round(min(4 + c * 3, 36) * budget))
@@ -302,16 +330,17 @@ def render(login, weeks, theme="dark", color_mode="auto", style="fluid"):
 
     # 그라데이션 정의 (언어별 + 기타)
     grads = "".join(
-        f'<linearGradient id="g{i}" x1="0" y1="0" x2="1" y2="1">'
-        f'<stop offset="0" stop-color="{palette[i]}"/><stop offset="1" stop-color="{tint(palette[i], .45)}"/>'
-        f'</linearGradient>' for i in range(min(len(ranked), len(palette))))
+        f'<linearGradient id="g{i}{v}" x1="0" y1="0" x2="1" y2="1">'
+        f'<stop offset="0" stop-color="{shift_hue(palette[i], dh)}"/>'
+        f'<stop offset="1" stop-color="{tint(shift_hue(palette[i], dh * 1.6), .45)}"/></linearGradient>'
+        for i in range(min(len(ranked), len(palette))) for v, dh in HUE_SHIFTS.items())
     grads += (f'<linearGradient id="gx" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{t["other"]}"/>'
               f'<stop offset="1" stop-color="{t["other"]}"/></linearGradient>')
 
     # 배경 오로라: 가장 많이 쓴 두 언어 색
     aurora = ""
     for i, (ax, ay, r) in enumerate([(W * .78, H * .35, 420), (W * .25, H * .75, 380)][:max(1, min(2, len(ranked)))]):
-        col = color_of[ranked[-1 - i] if mode == "intensity" else ranked[i]] if ranked else PALETTE[0]
+        col = color_of[ranked[-1 - i] if mode == "intensity" else ranked[i]] if ranked else palette[0]
         aurora += (f'<radialGradient id="a{i}"><stop offset="0" stop-color="{col}" stop-opacity="{t["aurora"]}"/>'
                    f'<stop offset="1" stop-color="{col}" stop-opacity="0"/></radialGradient>'
                    f'<circle cx="{ax:.0f}" cy="{ay:.0f}" r="{r}" fill="url(#a{i})"/>')
@@ -410,6 +439,8 @@ def main():
                     help="fluid: 입자 흐름(기본) / petal: 붓터치")
     ap.add_argument("--color", choices=["auto", "language", "repo", "intensity"], default="auto",
                     help="색 기준 (기본 auto: 데이터에 맞춰 자동 선택)")
+    ap.add_argument("--palette", choices=["auto", "random", *PALETTES], default="auto",
+                    help="auto: 아이디마다 고정된 팔레트 / random: 갱신할 때마다 바뀜 / 팔레트 이름 직접 지정")
     ap.add_argument("--demo", choices=["multi", "single", "mono"], nargs="?", const="multi",
                     help="샘플 데이터로 그리기 (토큰 불필요)")
     a = ap.parse_args()
@@ -424,7 +455,7 @@ def main():
 
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
     with open(a.out, "w", encoding="utf-8") as f:
-        f.write(render(a.user, weeks, a.theme, a.color, a.style))
+        f.write(render(a.user, weeks, a.theme, a.color, a.style, a.palette))
     print(f"saved {a.out}")
 
 

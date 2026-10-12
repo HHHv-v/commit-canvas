@@ -8,6 +8,8 @@
   <img alt="Commit Canvas demo" src="docs/demo-light.svg">
 </picture>
 
+**[👉 내 그림 보고 공유하기](https://hhhv-v.github.io/commit-canvas/)**
+
 ## 그림 규칙
 
 | 데이터 | 그림 |
@@ -15,7 +17,8 @@
 | 시간 | 왼쪽 → 오른쪽으로 흐름. 첫 기여 이전의 빈 기간은 잘라냄 |
 | 기여한 날 | 그날 칸에서 출발하는 입자들. 기여가 많을수록 입자 수·길이·굵기가 늘어남 |
 | 흐름 | curl noise + 도메인 워핑으로 만든 유체장. 깃허브 아이디가 시드라 사람마다 다름 |
-| 색 | 데이터에 맞춰 자동 선택 (아래 참고) |
+| 색 기준 | 언어·레포·기여량 중 데이터에 맞춰 자동 선택 (아래 참고) |
+| 색감 | 팔레트 8종 중 아이디로 하나를 고름. 입자마다 색조를 살짝 비틀어 한 색 안에서도 변화가 있음 |
 
 ### 색 기준 자동 선택 (`--color auto`)
 
@@ -28,6 +31,18 @@
 | 레포도 하나뿐 | **그날 기여량별** (`Daily`: 1–2 / 3–5 / 6–9 / 10+) |
 
 직접 고르고 싶다면 `--color language | repo | intensity`를 쓰면 돼요.
+
+### 팔레트 (`--palette`)
+
+`aurora` `sunset` `ocean` `neon` `pastel` `forest` `candy` `ember` 8종이 있어요.
+
+| 값 | 동작 |
+|---|---|
+| `auto` (기본) | 아이디로 하나를 고정 선택. 사람마다 색감이 다르고, 같은 사람은 매일 같은 색감 |
+| `random` | 그림을 새로 그릴 때마다 팔레트가 바뀜 |
+| 팔레트 이름 | 원하는 팔레트로 고정 |
+
+같은 팔레트 안에서도 입자마다 색조를 ±14° 정도 비틀어서, 한 언어만 쓰는 사람도 그림이 평평한 단색으로 보이지 않아요.
 
 ## 동작 방식
 
@@ -63,6 +78,7 @@ GitHub GraphQL API에서 두 가지를 가져와요.
 
 언어 비율을 먼저 보고, 한 언어가 80% 이상이면 레포 기준으로, 레포도 하나뿐이면 기여량 기준으로 넘어가요.
 그다음 **많이 쓴 순서대로** 팔레트 색을 배정해요. GitHub 공식 언어 색은 TypeScript와 Python처럼 서로 비슷한 경우가 있어서, 서로 확실히 구분되는 자체 팔레트를 써요.
+각 색은 색조를 0°, +14°, −14° 비튼 세 가지 그라데이션으로 만들어지고, 입자마다 셋 중 하나를 무작위로 골라요.
 
 ### 4. 유체장 만들기
 
@@ -120,11 +136,30 @@ GitHub Actions가 매일 자정(KST)과 main에 push할 때마다 위 과정을 
 3. 프로필 README에 아래를 붙여요 (`USER`를 내 아이디로).
 
 ```html
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas-dark.svg">
-  <img alt="Commit Canvas" src="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas.svg">
-</picture>
+<a href="https://hhhv-v.github.io/commit-canvas/?user=USER">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas-dark.svg">
+    <img alt="Commit Canvas" src="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas.svg">
+  </picture>
+</a>
 ```
+
+그림을 누르면 공유 페이지로 이어져요.
+
+## 공유하기
+
+[공유 페이지](https://hhhv-v.github.io/commit-canvas/)에 아이디를 넣으면 내 그림을 크게 보고 공유할 수 있어요. 링크는 `?user=아이디` 형태라 그대로 보내면 돼요.
+
+| 기능 | 설명 |
+|---|---|
+| PNG 저장 | 애니메이션이 끝난 완성 상태를 2배 해상도(2400×1120)로 저장 |
+| 공유하기 | 모바일에서는 시스템 공유 시트로 이미지와 링크를 함께 보냄. 지원하지 않는 브라우저는 링크 복사 |
+| X · LinkedIn | 문구와 링크가 채워진 게시 화면을 엶 |
+| 링크 복사 | 내 그림 공유 페이지 주소를 복사 |
+| README 코드 복사 | 공유 페이지로 이어지는 프로필 README 코드를 복사 |
+| 테마 전환 | 다크·라이트 그림을 바꿔 봄 |
+
+공유 페이지는 서버 없이 동작해요. 각자의 `output` 브랜치에 있는 SVG를 브라우저가 직접 불러오고, PNG 변환도 브라우저 안에서 해요.
 
 ## 로컬에서 돌려보기
 
@@ -139,6 +174,7 @@ GITHUB_TOKEN=... python src/generate.py --user HHHv-v                      # 실
 | `--theme` | `dark` / `light` | `dark` |
 | `--style` | `fluid` (입자 흐름) / `petal` (붓터치) | `fluid` |
 | `--color` | `auto` / `language` / `repo` / `intensity` | `auto` |
+| `--palette` | `auto` / `random` / 팔레트 이름 | `auto` |
 | `--demo` | `multi` / `single` / `mono` (샘플 데이터 종류) | 실제 데이터 |
 
 의존성 없이 Python 표준 라이브러리만 사용해요.
@@ -147,6 +183,8 @@ GITHUB_TOKEN=... python src/generate.py --user HHHv-v                      # 실
 
 - [x] 입자 유체 스타일 (`--style fluid`, 기본) / 붓터치 스타일 (`--style petal`)
 - [x] 한 언어 사용자를 위한 색 기준 자동 선택
+- [x] 팔레트 8종과 입자별 색조 변주
+- [x] 공유 페이지 (PNG 저장, X·LinkedIn 공유, 링크 복사)
 - [ ] Vercel API 버전 (`/api?user=...`) — Fork 없이 바로 사용
 - [ ] 테마 추가 (수묵, 수채, 네온)
 

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commit Canvas</title>
+<meta name="description" content="1년치 GitHub 기여를 흐르는 데이터 페인팅으로 그려주는 프로필 위젯">
+<meta property="og:title" content="Commit Canvas">
+<meta property="og:description" content="내 1년의 GitHub 기여가 한 점의 그림이 됐어요.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237C5CFF'/><stop offset='1' stop-color='%23FF5C93'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='%230B0B10'/><path d='M6 20c4-10 8 4 12-4s6-6 8-2' stroke='url(%23g)' stroke-width='3' fill='none' stroke-linecap='round'/></svg>">
+<style>
+  :root {
+    --bg: #0B0B10; --surface: #13131B; --surface-2: #1B1B26; --border: #24243200;
+    --line: #262634; --text: #F5F5FA; --sub: #9A9AAE; --accent: #7C5CFF; --accent-2: #FF5C93;
+    --ok: #14B8A6; --radius: 16px;
+  }
+  :root[data-theme="light"] {
+    --bg: #F7F7FA; --surface: #FFFFFF; --surface-2: #F1F1F6; --line: #E6E6EE;
+    --text: #111118; --sub: #6B6B7B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body {
+    font-family: Inter, "Segoe UI", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(60rem 30rem at 85% -10%, color-mix(in srgb, var(--accent) 18%, transparent), transparent),
+                      radial-gradient(50rem 30rem at -10% 110%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent);
+    background-attachment: fixed;
+  }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 40px 16px 64px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 36px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.2px; text-decoration: none; color: inherit; }
+  .brand i { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: block; }
+  .ghost { background: transparent; border: 1px solid var(--line); color: var(--text); }
+  h1 { font-size: clamp(30px, 5vw, 48px); letter-spacing: -1.5px; line-height: 1.08; margin: 0 0 12px; }
+  h1 span { background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { color: var(--sub); font-size: 17px; margin: 0 0 28px; line-height: 1.6; }
+
+  form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .field { flex: 1 1 260px; display: flex; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; }
+  .field span { color: var(--sub); }
+  .field input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 16px; padding: 13px 4px; }
+  .field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+
+  button, .btn {
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 12px; padding: 12px 16px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text);
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none; white-space: nowrap;
+    transition: transform .12s ease, border-color .12s ease, background .12s ease;
+  }
+  button:hover, .btn:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); }
+  button:active, .btn:active { transform: translateY(1px); }
+  button.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: 0; color: #fff; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  svg.ic { width: 16px; height: 16px; flex: none; }
+
+  .seg { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
+  .seg button { border: 0; background: transparent; padding: 8px 12px; border-radius: 9px; color: var(--sub); }
+  .seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--text); }
+
+  .stage {
+    position: relative; border-radius: 24px; overflow: hidden; background: var(--surface);
+    border: 1px solid var(--line); aspect-ratio: 1200 / 560;
+  }
+  .stage img { display: block; width: 100%; height: 100%; }
+  .stage .msg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--sub); line-height: 1.6; }
+  .stage .msg strong { color: var(--text); display: block; font-size: 17px; margin-bottom: 4px; }
+  .stage .msg a { color: var(--accent); }
+  .shimmer { position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--text) 6%, transparent) 50%, transparent 70%); background-size: 200% 100%; animation: sh 1.4s linear infinite; }
+  @keyframes sh { to { background-position: -200% 0; } }
+
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin: 16px 0 28px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .card h2 { font-size: 15px; margin: 0 0 6px; }
+  .card p { color: var(--sub); font-size: 14px; margin: 0 0 14px; line-height: 1.6; }
+  pre { margin: 0 0 12px; background: var(--surface-2); border-radius: 10px; padding: 12px; font-size: 12px; line-height: 1.5; overflow-x: auto; color: var(--sub); white-space: pre; }
+  ol { margin: 0; padding-left: 18px; color: var(--sub); font-size: 14px; line-height: 1.8; }
+  ol a { color: var(--accent); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0;
+    background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600;
+    transition: all .2s ease; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  footer { margin-top: 40px; color: var(--sub); font-size: 13px; text-align: center; }
+  footer a { color: inherit; }
+  @media (max-width: 560px) { .wrap { padding-top: 24px; } .bar { flex-direction: column; align-items: stretch; } .actions button { flex: 1 1 calc(50% - 8px); justify-content: center; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="./"><i></i>Commit Canvas</a>
+    <a class="btn ghost" id="repoLink" href="https://github.com/HHHv-v/commit-canvas" target="_blank" rel="noopener">
+      <svg class="ic" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.67.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.83-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>
+      GitHub
+    </a>
+  </header>
+
+  <h1>내 1년의 GitHub 기여가<br><span>한 점의 그림</span>이 됐어요</h1>
+  <p class="lead">기여 하나하나가 입자가 되어 흐르며 만든 그림이에요. 아이디를 넣어 보고, 저장하고, 공유해 보세요.</p>
+
+  <form id="form">
+    <label class="field"><span>@</span><input id="user" autocomplete="off" spellcheck="false" placeholder="GitHub 아이디" aria-label="GitHub 아이디"></label>
+    <button class="primary" type="submit">그림 보기</button>
+  </form>
+
+  <div class="stage" id="stage"><div class="shimmer"></div></div>
+
+  <div class="bar">
+    <div class="seg" role="group" aria-label="테마">
+      <button type="button" data-theme="dark" aria-pressed="true">다크</button>
+      <button type="button" data-theme="light" aria-pressed="false">라이트</button>
+    </div>
+    <div class="actions">
+      <button type="button" id="btnDownload" disabled>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>PNG 저장</button>
+      <button type="button" id="btnShare" disabled>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14"/></svg>공유하기</button>
+      <button type="button" id="btnX" disabled>
+        <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.8l-5.3-6.9L4.8 22H1.7l8.1-9.3L1 2h7l4.8 6.3L18.9 2Zm-1.2 18h1.9L7.4 3.9h-2L17.7 20Z"/></svg>X</button>
+      <button type="button" id="btnLinkedIn" disabled>
+        <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.2ZM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2ZM7.1 20.5H3.5V9h3.6v11.5ZM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7C24 .8 23.2 0 22.2 0Z"/></svg>LinkedIn</button>
+      <button type="button" id="btnLink" disabled>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>링크 복사</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>프로필 README에 붙이기</h2>
+      <p>그림을 누르면 이 공유 페이지로 이어져요. 매일 자정에 새 기여가 반영돼요.</p>
+      <pre id="snippet"></pre>
+      <button type="button" id="btnSnippet">README 코드 복사</button>
+    </section>
+    <section class="card">
+      <h2>내 그림 만들기</h2>
+      <p>아직 그림이 없다면, 1분이면 만들 수 있어요.</p>
+      <ol>
+        <li><a id="forkLink" href="https://github.com/HHHv-v/commit-canvas/fork" target="_blank" rel="noopener">commit-canvas</a>를 Fork 해요.</li>
+        <li>Fork한 레포의 <b>Actions</b> 탭에서 워크플로를 켜요.</li>
+        <li><b>Generate Commit Canvas → Run workflow</b>를 눌러요.</li>
+        <li>여기서 내 아이디를 넣어 확인해요.</li>
+      </ol>
+    </section>
+  </div>
+
+  <footer>Made with Commit Canvas · <a id="footerRepo" href="https://github.com/HHHv-v/commit-canvas" target="_blank" rel="noopener">source</a></footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const HOME_OWNER = "HHHv-v";           // 공유 페이지가 원래 있는 레포의 주인
+  const REPO = "commit-canvas";
+  const $ = (id) => document.getElementById(id);
+  const stage = $("stage"), input = $("user");
+
+  // GitHub Pages 주소(<owner>.github.io)면 그 owner를 기본 아이디로
+  const pagesOwner = location.hostname.endsWith(".github.io") ? location.hostname.split(".")[0] : null;
+  const params = new URLSearchParams(location.search);
+  let user = (params.get("user") || pagesOwner || HOME_OWNER).trim();
+  let theme = params.get("theme") === "light" ? "light" : "dark";
+  let svgText = null;
+
+  const pageUrl = () => {
+    const u = new URL(location.origin + location.pathname);
+    u.searchParams.set("user", user);
+    return u.toString();
+  };
+  const svgUrl = (t) =>
+    `https://raw.githubusercontent.com/${encodeURIComponent(user)}/${REPO}/output/commit-canvas${t === "dark" ? "-dark" : ""}.svg`;
+
+  function toast(text) {
+    const t = $("toast");
+    t.textContent = text;
+    t.classList.add("show");
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => t.classList.remove("show"), 1800);
+  }
+
+  async function copy(text, done) {
+    try { await navigator.clipboard.writeText(text); toast(done); }
+    catch { prompt("복사해서 쓰세요", text); }
+  }
+
+  function setButtons(on) {
+    ["btnDownload", "btnShare", "btnX", "btnLinkedIn", "btnLink"].forEach((id) => ($(id).disabled = !on));
+  }
+
+  function renderSnippet() {
+    $("snippet").textContent =
+`<a href="${pageUrl()}">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="${svgUrl("dark")}">
+    <img alt="Commit Canvas" src="${svgUrl("light")}">
+  </picture>
+</a>`;
+    $("forkLink").textContent = `${HOME_OWNER}/${REPO}`;
+  }
+
+  async function load() {
+    document.documentElement.dataset.theme = theme;
+    document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.theme === theme)));
+    input.value = user;
+    history.replaceState(null, "", `?user=${encodeURIComponent(user)}${theme === "light" ? "&theme=light" : ""}`);
+    document.title = `@${user} · Commit Canvas`;
+    renderSnippet();
+
+    stage.innerHTML = '<div class="shimmer"></div>';
+    setButtons(false);
+    svgText = null;
+    try {
+      const res = await fetch(svgUrl(theme), { cache: "no-store" });
+      if (!res.ok) throw new Error(res.status);
+      svgText = await res.text();
+      const img = new Image();
+      img.alt = `@${user}의 Commit Canvas`;
+      img.src = URL.createObjectURL(new Blob([svgText], { type: "image/svg+xml" }));
+      img.onload = () => { stage.innerHTML = ""; stage.appendChild(img); setButtons(true); };
+    } catch {
+      stage.innerHTML = `<div class="msg"><div><strong>@${user}의 그림을 찾지 못했어요</strong>
+        아이디를 확인하거나, <a href="https://github.com/${HOME_OWNER}/${REPO}/fork" target="_blank" rel="noopener">Fork</a>한 뒤 Actions를 한 번 실행해 주세요.</div></div>`;
+    }
+  }
+
+  // 애니메이션이 시작 전(빈 화면)으로 캡처되지 않게, 완성된 정지 상태로 바꿔서 PNG를 만듦
+  async function toPngBlob(scale = 2) {
+    const still = svgText
+      .replace(/stroke-dashoffset:\s*300;?/g, "stroke-dashoffset:0;")
+      .replace(/opacity:0;animation/g, "opacity:1;animation")
+      .replace(/animation:[^;}]+;?/g, "");
+    const img = new Image();
+    img.src = URL.createObjectURL(new Blob([still], { type: "image/svg+xml" }));
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = 1200 * scale; c.height = 560 * scale;
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return new Promise((r) => c.toBlob(r, "image/png"));
+  }
+
+  const shareText = () => `내 1년의 GitHub 기여가 한 점의 그림이 됐어요 🎨 @${user}`;
+
+  $("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = input.value.trim().replace(/^@/, "").replace(/^https?:\/\/github\.com\//, "").split("/")[0];
+    if (!v) return;
+    user = v; load();
+  });
+  document.querySelectorAll(".seg button").forEach((b) =>
+    b.addEventListener("click", () => { if (theme !== b.dataset.theme) { theme = b.dataset.theme; load(); } }));
+
+  $("btnDownload").addEventListener("click", async () => {
+    const blob = await toPngBlob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `commit-canvas-${user}-${theme}.png`;
+    a.click();
+    toast("PNG를 저장했어요");
+  });
+
+  $("btnShare").addEventListener("click", async () => {
+    try {
+      const file = new File([await toPngBlob()], `commit-canvas-${user}.png`, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Commit Canvas", text: shareText(), url: pageUrl() });
+      } else if (navigator.share) {
+        await navigator.share({ title: "Commit Canvas", text: shareText(), url: pageUrl() });
+      } else {
+        copy(pageUrl(), "링크를 복사했어요");
+      }
+    } catch (e) { if (e && e.name !== "AbortError") copy(pageUrl(), "링크를 복사했어요"); }
+  });
+
+  $("btnX").addEventListener("click", () =>
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText())}&url=${encodeURIComponent(pageUrl())}`, "_blank", "noopener"));
+  $("btnLinkedIn").addEventListener("click", () =>
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl())}`, "_blank", "noopener"));
+  $("btnLink").addEventListener("click", () => copy(pageUrl(), "링크를 복사했어요"));
+  $("btnSnippet").addEventListener("click", () => copy($("snippet").textContent, "README 코드를 복사했어요"));
+
+  load();
+})();
+</script>
+</body>
+</html>
