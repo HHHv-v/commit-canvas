@@ -3,10 +3,12 @@
 GitHub 기여 1년치를 한 장의 그림으로 그려주는 프로필 위젯.
 커밋한 날마다 입자가 흘러나오고, 쓴 언어와 프로젝트가 색이 됩니다.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/demo-dark.svg">
-  <img alt="Commit Canvas 예시" src="docs/demo-light.svg" width="100%">
-</picture>
+<a href="https://github.com/HHHv-v/commit-canvas#readme">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/demo-dark.svg">
+    <img alt="Commit Canvas 예시" src="docs/demo-light.svg" width="100%">
+  </picture>
+</a>
 
 <sub>예시 그림 · 1년 동안 Go → TypeScript → Python → Rust로 주력 언어가 바뀐 가상의 개발자</sub>
 
