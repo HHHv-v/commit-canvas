@@ -166,6 +166,10 @@ def choose_mode(weeks, requested="auto"):
     }[requested]
 
 
+WIDTHS = [.7, 1.1, 1.6, 2.2]       # 입자 굵기 단계 (CSS 클래스로 재사용)
+OPACITIES = [.35, .55, .75]        # 입자 투명도 단계
+
+
 def render(login, weeks, theme="dark", color_mode="auto", style="fluid"):
     t = THEMES[theme]
     W, H = 1200, 560
@@ -225,7 +229,12 @@ def render(login, weeks, theme="dark", color_mode="auto", style="fluid"):
             x += math.cos(a) * step
             y += math.sin(a) * step
             pts.append((x, y))
-        return "M" + " ".join(f"{a:.0f},{b:.0f}" for a, b in pts)
+        r = [(round(a), round(b)) for a, b in pts]
+        out = [f"M{r[0][0]} {r[0][1]}l"]
+        for (ax, ay), (bx, by) in zip(r, r[1:]):
+            dx, dy = bx - ax, by - ay
+            out.append(f"{dx} {dy}")
+        return out[0] + " ".join(out[1:])
 
     def ribbon(x, y, length, width):
         """흐름장을 따라가는 중심선 → 시작은 굵고 끝은 가늘어지는 리본 폴리곤."""
@@ -274,11 +283,15 @@ def render(login, weeks, theme="dark", color_mode="auto", style="fluid"):
             if style == "fluid":
                 n = max(2, round(min(4 + c * 3, 36) * budget))
                 spread = 10 + min(c, 12) * 1.5
+                max_w = 1 + min(c, 10) * .22          # 기여가 많은 날일수록 굵은 입자가 섞임
+                paths = []
                 for _ in range(n):
                     d = trail(cx + rng.gauss(0, spread * .5), cy + rng.gauss(0, spread * .5),
                               rng.uniform(70, 150) + min(c, 15) * 6)
-                    shapes.append(f'<path d="{d}" stroke="url(#{grad})" stroke-width="{rng.uniform(.6, 1.6 + min(c, 10) * .12):.1f}" '
-                                  f'stroke-opacity="{rng.uniform(.3, .75):.2f}" pathLength="1" style="animation-delay:{delay + rng.uniform(0, .5):.2f}s"/>')
+                    wcls = min(range(len(WIDTHS)), key=lambda i: abs(WIDTHS[i] - rng.uniform(.6, max_w)))
+                    paths.append(f'<path class="w{wcls}{rng.randrange(len(OPACITIES))}" d="{d}"/>')
+                # 같은 날의 입자는 색·시작 시간이 같으니 그룹에 한 번만 적음
+                shapes.append(f'<g stroke="url(#{grad})" style="--d:{delay:.1f}s">{"".join(paths)}</g>')
                 continue
             for _ in range(1 + min(c // 4, 3)):
                 d = ribbon(cx + rng.uniform(-5, 5), cy + rng.uniform(-5, 5),
@@ -325,14 +338,17 @@ def render(login, weeks, theme="dark", color_mode="auto", style="fluid"):
         return f"{['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][int(m) - 1]} {y}"
 
     if style == "fluid":
-        art_css = (".art path{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;"
-                   "animation:flow 2.2s cubic-bezier(.2,.7,.2,1) forwards}"
-                   "@keyframes flow{to{stroke-dashoffset:0}}"
+        art_css = (".art path{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:300;stroke-dashoffset:300;"
+                   "animation:flow 2.2s cubic-bezier(.2,.7,.2,1) var(--d,0s) forwards}"
+                   + "".join(f".w{i}{j}{{stroke-width:{w};stroke-opacity:{o}}}"
+                             for i, w in enumerate(WIDTHS) for j, o in enumerate(OPACITIES))
+                   + "@keyframes flow{to{stroke-dashoffset:0}}"
                    "@media (prefers-reduced-motion:reduce){.art path{animation:none;stroke-dashoffset:0}}")
     else:
         art_css = (".art path{opacity:0;animation:in .9s ease-out forwards}@keyframes in{to{opacity:1}}"
                    "@media (prefers-reduced-motion:reduce){.art path{animation:none;opacity:1}}")
     glow = '<use href="#art" filter="url(#glow)" opacity=".7"/>' if t["glow"] else ""
+    title_w = 120 + len(f"{total:,}") * 28 + 150   # 큰 숫자 + 'contributions' 너비에 맞춤
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">
 <defs>
   {grads}
@@ -347,7 +363,9 @@ def render(login, weeks, theme="dark", color_mode="auto", style="fluid"):
   </linearGradient>
   <mask id="artzone" maskUnits="userSpaceOnUse" x="0" y="0" width="{W}" height="{H}">
     <rect x="0" y="122" width="{W}" height="{ART_Y1 + 30 - 122}" fill="url(#fadeY)"/>
+    <rect x="30" y="20" width="{title_w}" height="150" rx="40" fill="#000" filter="url(#soft)"/>
   </mask>
+  <filter id="soft" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="16"/></filter>
   <mask id="artzoneX" maskUnits="userSpaceOnUse" x="0" y="0" width="{W}" height="{H}">
     <rect x="0" y="0" width="{W}" height="{H}" fill="url(#fadeX)"/>
   </mask>
