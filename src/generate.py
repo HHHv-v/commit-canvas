@@ -89,8 +89,10 @@ def fetch(login, token):
 
 
 def demo_data(seed, profile="multi"):
-    """최근 몇 달에 활동이 몰린 샘플. profile: multi(여러 언어) / single(한 언어·여러 레포) / mono(한 레포)"""
+    """샘플 데이터. profile: multi(여러 언어) / single(한 언어·여러 레포) / mono(한 레포) / showcase(README 예시용, 1년 내내 활발)"""
     rng = random.Random(seed)
+    if profile == "showcase":
+        return showcase_data(seed)
     langs = {"multi": [("TypeScript", .55), ("Python", .28), ("Jupyter Notebook", .07), ("CSS", .06), ("C", .04)],
              "single": [("TypeScript", 1)], "mono": [("TypeScript", 1)]}[profile]
     repos = {"multi": [("samdan", .4), ("hearo", .3), ("python-course", .3)],
@@ -107,6 +109,32 @@ def demo_data(seed, profile="multi"):
             repo = rng.choices([r[0] for r in repos], [r[1] for r in repos])[0] if c else None
             days.append({"date": str(start + timedelta(days=w * 7 + d)), "weekday": d, "count": c,
                          "lang": lang, "repo": repo})
+        weeks.append(days)
+    return weeks
+
+
+def showcase_data(seed):
+    """README 예시용: 1년 내내 꾸준하고, 시기마다 주력 언어가 바뀌는 가상의 개발자."""
+    rng = random.Random(seed)
+    eras = [  # (시작 주, 언어 가중치) — 시기별로 주력 언어가 바뀌어 색이 흐르듯 이어짐
+        (0,  {"Go": .5, "TypeScript": .3, "Shell": .2}),
+        (12, {"TypeScript": .6, "CSS": .25, "Go": .15}),
+        (24, {"Python": .55, "Jupyter Notebook": .3, "TypeScript": .15}),
+        (36, {"Rust": .55, "Python": .2, "TypeScript": .25}),
+        (46, {"TypeScript": .4, "Rust": .3, "CSS": .3}),
+    ]
+    start = date.today() - timedelta(days=date.today().weekday() + 1 + 52 * 7)
+    weeks = []
+    for w in range(53):
+        weights = [e for e in eras if e[0] <= w][-1][1]
+        busy = .55 + .35 * math.sin(w / 53 * math.pi * 3) ** 2
+        days = []
+        for d in range(7):
+            p = busy * (.45 if d in (0, 6) else 1)
+            c = 0 if rng.random() > p else max(1, int(rng.expovariate(1 / 4.5)))
+            lang = rng.choices(list(weights), list(weights.values()))[0] if c else None
+            days.append({"date": str(start + timedelta(days=w * 7 + d)), "weekday": d, "count": c,
+                         "lang": lang, "repo": lang})
         weeks.append(days)
     return weeks
 
@@ -441,7 +469,7 @@ def main():
                     help="색 기준 (기본 auto: 데이터에 맞춰 자동 선택)")
     ap.add_argument("--palette", choices=["auto", "random", *PALETTES], default="auto",
                     help="auto: 아이디마다 고정된 팔레트 / random: 갱신할 때마다 바뀜 / 팔레트 이름 직접 지정")
-    ap.add_argument("--demo", choices=["multi", "single", "mono"], nargs="?", const="multi",
+    ap.add_argument("--demo", choices=["multi", "single", "mono", "showcase"], nargs="?", const="multi",
                     help="샘플 데이터로 그리기 (토큰 불필요)")
     a = ap.parse_args()
 

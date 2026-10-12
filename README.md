@@ -3,14 +3,12 @@
 GitHub 기여 1년치를 한 장의 그림으로 그려주는 프로필 위젯.
 커밋한 날마다 입자가 흘러나오고, 쓴 언어와 프로젝트가 색이 됩니다.
 
-<a href="https://hhhv-v.github.io/commit-canvas/?user=HHHv-v">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/HHHv-v/commit-canvas/output/commit-canvas-dark.svg">
-    <img alt="@HHHv-v의 Commit Canvas" src="https://raw.githubusercontent.com/HHHv-v/commit-canvas/output/commit-canvas.svg" width="100%">
-  </picture>
-</a>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/demo-dark.svg">
+  <img alt="Commit Canvas 예시" src="docs/demo-light.svg" width="100%">
+</picture>
 
-<sub>@HHHv-v의 실제 기여로 매일 새로 그려지는 그림</sub>
+<sub>예시 그림 · 1년 동안 Go → TypeScript → Python → Rust로 주력 언어가 바뀐 가상의 개발자</sub>
 
 [공유 페이지](https://hhhv-v.github.io/commit-canvas/) · [Fork](https://github.com/HHHv-v/commit-canvas/fork) · [동작 방식](#동작-방식)
 
@@ -170,6 +168,7 @@ GitHub Actions가 매일 자정(KST)과 main에 push할 때마다 위 과정을 
 ```bash
 python src/generate.py --user HHHv-v --demo --out dist/demo.svg            # 샘플 (여러 언어)
 python src/generate.py --user HHHv-v --demo single --out dist/demo.svg     # 샘플 (한 언어, 여러 레포)
+python src/generate.py --user commit-canvas --demo showcase --palette candy  # README 예시 그림
 GITHUB_TOKEN=... python src/generate.py --user HHHv-v                      # 실제 데이터
 ```
 
@@ -179,7 +178,7 @@ GITHUB_TOKEN=... python src/generate.py --user HHHv-v                      # 실
 | `--style` | `fluid` (입자 흐름) / `petal` (붓터치) | `fluid` |
 | `--color` | `auto` / `language` / `repo` / `intensity` | `auto` |
 | `--palette` | `auto` / `random` / 팔레트 이름 | `auto` |
-| `--demo` | `multi` / `single` / `mono` (샘플 데이터 종류) | 실제 데이터 |
+| `--demo` | `multi` / `single` / `mono` / `showcase` (샘플 데이터 종류) | 실제 데이터 |
 
 의존성 없이 Python 표준 라이브러리만 사용해요.
 
