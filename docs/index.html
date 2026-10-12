@@ -25,24 +25,19 @@
   body {
     font-family: Inter, "Segoe UI", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     min-height: 100vh; -webkit-font-smoothing: antialiased;
-    background-image: radial-gradient(60rem 30rem at 85% -10%, color-mix(in srgb, var(--accent) 18%, transparent), transparent),
-                      radial-gradient(50rem 30rem at -10% 110%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent);
-    background-attachment: fixed;
   }
   .wrap { max-width: 1160px; margin: 0 auto; padding: 40px 16px 64px; }
   header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 36px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.2px; text-decoration: none; color: inherit; }
-  .brand i { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: block; }
+  .brand { font-weight: 600; font-size: 15px; text-decoration: none; color: inherit; }
   .ghost { background: transparent; border: 1px solid var(--line); color: var(--text); }
-  h1 { font-size: clamp(30px, 5vw, 48px); letter-spacing: -1.5px; line-height: 1.08; margin: 0 0 12px; }
-  h1 span { background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .lead { color: var(--sub); font-size: 17px; margin: 0 0 28px; line-height: 1.6; }
+  h1 { font-size: clamp(22px, 3vw, 28px); font-weight: 600; letter-spacing: -.4px; line-height: 1.35; margin: 0 0 6px; }
+  .lead { color: var(--sub); font-size: 15px; margin: 0 0 24px; line-height: 1.6; }
 
   form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
   .field { flex: 1 1 260px; display: flex; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; }
   .field span { color: var(--sub); }
   .field input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 16px; padding: 13px 4px; }
-  .field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+  .field:focus-within { border-color: var(--sub); }
 
   button, .btn {
     font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 12px; padding: 12px 16px;
@@ -50,9 +45,9 @@
     display: inline-flex; align-items: center; gap: 8px; text-decoration: none; white-space: nowrap;
     transition: transform .12s ease, border-color .12s ease, background .12s ease;
   }
-  button:hover, .btn:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); }
+  button:hover, .btn:hover { border-color: var(--sub); }
   button:active, .btn:active { transform: translateY(1px); }
-  button.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: 0; color: #fff; }
+  button.primary { background: var(--text); border: 0; color: var(--bg); }
   button:disabled { opacity: .45; cursor: not-allowed; }
   svg.ic { width: 16px; height: 16px; flex: none; }
 
@@ -96,15 +91,15 @@
 <body>
 <div class="wrap">
   <header>
-    <a class="brand" href="./"><i></i>Commit Canvas</a>
+    <a class="brand" href="./">Commit Canvas</a>
     <a class="btn ghost" id="repoLink" href="https://github.com/HHHv-v/commit-canvas" target="_blank" rel="noopener">
       <svg class="ic" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.67.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.83-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>
       GitHub
     </a>
   </header>
 
-  <h1>내 1년의 GitHub 기여가<br><span>한 점의 그림</span>이 됐어요</h1>
-  <p class="lead">기여 하나하나가 입자가 되어 흐르며 만든 그림이에요. 아이디를 넣어 보고, 저장하고, 공유해 보세요.</p>
+  <h1>GitHub 기여 1년치를 한 장의 그림으로</h1>
+  <p class="lead">아이디를 넣으면 그 사람의 그림을 볼 수 있어요. PNG로 저장하거나 링크로 공유할 수 있어요.</p>
 
   <form id="form">
     <label class="field"><span>@</span><input id="user" autocomplete="off" spellcheck="false" placeholder="GitHub 아이디" aria-label="GitHub 아이디"></label>
@@ -165,7 +160,9 @@
   // GitHub Pages 주소(<owner>.github.io)면 그 owner를 기본 아이디로
   const pagesOwner = location.hostname.endsWith(".github.io") ? location.hostname.split(".")[0] : null;
   const params = new URLSearchParams(location.search);
-  let user = (params.get("user") || pagesOwner || HOME_OWNER).trim();
+  // github.io 주소는 소문자라서, 원래 주인이면 대소문자를 살린 아이디로 보여줌
+  const owner = pagesOwner && pagesOwner.toLowerCase() === HOME_OWNER.toLowerCase() ? HOME_OWNER : pagesOwner;
+  let user = (params.get("user") || owner || HOME_OWNER).trim();
   let theme = params.get("theme") === "light" ? "light" : "dark";
   let svgText = null;
 
