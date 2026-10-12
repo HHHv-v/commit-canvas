@@ -1,11 +1,7 @@
-<a href="https://hhhv-v.github.io/commit-canvas/"><img src="docs/readme/hero.svg" alt="Commit Canvas — 내 1년의 GitHub 기여가 한 점의 그림이 됐어요" width="100%"></a>
+# Commit Canvas
 
-<p>
-  <a href="https://hhhv-v.github.io/commit-canvas/"><img src="docs/readme/btn-view.svg" alt="내 그림 보기" height="44"></a>
-  <a href="https://hhhv-v.github.io/commit-canvas/"><img src="docs/readme/btn-png.svg" alt="PNG 저장" height="44"></a>
-  <a href="https://hhhv-v.github.io/commit-canvas/"><img src="docs/readme/btn-share.svg" alt="공유하기" height="44"></a>
-  <a href="https://github.com/HHHv-v/commit-canvas/fork"><img src="docs/readme/btn-fork.svg" alt="Fork 하기" height="44"></a>
-</p>
+GitHub 기여 1년치를 한 장의 그림으로 그려주는 프로필 위젯.
+커밋한 날마다 입자가 흘러나오고, 쓴 언어와 프로젝트가 색이 됩니다.
 
 <a href="https://hhhv-v.github.io/commit-canvas/?user=HHHv-v">
   <picture>
@@ -14,46 +10,26 @@
   </picture>
 </a>
 
-<sub>↑ 실제 @HHHv-v의 기여로 매일 새로 그려지는 그림이에요.</sub>
+<sub>@HHHv-v의 실제 기여로 매일 새로 그려지는 그림</sub>
 
-<table>
-<tr>
-<td width="50%" valign="top">
+[공유 페이지](https://hhhv-v.github.io/commit-canvas/) · [Fork](https://github.com/HHHv-v/commit-canvas/fork) · [동작 방식](#동작-방식)
 
-### 프로필 README에 붙이기
+## 시작하기
 
-그림을 누르면 공유 페이지로 이어져요. 매일 자정에 새 기여가 반영돼요.
+1. 이 레포를 Fork 해요.
+2. Fork한 레포의 **Actions** 탭에서 워크플로를 켜고, `Generate Commit Canvas` → **Run workflow**를 눌러요.
+3. 프로필 README에 아래를 붙여요. `USER`를 내 아이디로 바꾸면 돼요.
 
 ```html
 <a href="https://hhhv-v.github.io/commit-canvas/?user=USER">
   <picture>
-    <source media="(prefers-color-scheme: dark)"
-      srcset="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas-dark.svg">
-    <img alt="Commit Canvas"
-      src="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas-dark.svg">
+    <img alt="Commit Canvas" src="https://raw.githubusercontent.com/USER/commit-canvas/output/commit-canvas.svg">
   </picture>
 </a>
 ```
 
-`USER`를 내 아이디로 바꿔서 붙여요.
-
-</td>
-<td width="50%" valign="top">
-
-### 내 그림 만들기
-
-아직 그림이 없다면, 1분이면 만들 수 있어요.
-
-1. 이 레포를 [**Fork**](https://github.com/HHHv-v/commit-canvas/fork) 해요.
-2. Fork한 레포의 **Actions** 탭에서 워크플로를 켜요.
-3. **Generate Commit Canvas → Run workflow**를 눌러요.
-4. [공유 페이지](https://hhhv-v.github.io/commit-canvas/)에 내 아이디를 넣어 확인해요.
-
-</td>
-</tr>
-</table>
-
-<br>
+매일 자정(KST)에 새 기여가 반영되고, 그림을 누르면 공유 페이지로 이어져요.
 
 ## 그림 규칙
 
