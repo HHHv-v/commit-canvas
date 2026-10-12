@@ -166,22 +166,23 @@ def render(login, weeks, colors, theme="light"):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">
 <style>
   .t{{font-family:'Noto Serif KR','Noto Serif CJK KR',Georgia,serif;font-size:26px;fill:{pal["title"]};font-weight:700}}
-  .s{{font-family:'Noto Sans KR','Noto Sans CJK KR',-apple-system,sans-serif;font-size:14px;fill:{pal["sub"]}}}
+  .s{{font-family:'Noto Sans KR','Noto Sans CJK KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;fill:{pal["sub"]}}}
   .ink path{{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.4s ease-out forwards}}
   @keyframes draw{{to{{stroke-dashoffset:0}}}}
   @media (prefers-reduced-motion:reduce){{.ink path{{animation:none;stroke-dashoffset:0}}}}
 </style>
+<clipPath id="frame"><rect x="30" y="30" width="{W - 60}" height="{BOTTOM - 10}"/></clipPath>
 <rect width="{W}" height="{H}" fill="{pal["bg"]}"/>
 {grain}
 <rect x="30" y="30" width="{W - 60}" height="{BOTTOM - 10}" fill="none" stroke="{pal["frame"]}"/>
-<g class="ink">{"".join(strokes)}</g>
-{gold}
+<g class="ink" clip-path="url(#frame)">{"".join(strokes)}</g>
+<g clip-path="url(#frame)">{gold}</g>
 <text x="{PAD_X}" y="{H - 78}" class="t">Commit Canvas</text>
 <text x="{PAD_X + 215}" y="{H - 78}" class="s">@{login} · {first} – {last} · {total:,} contributions · 최장 연속 {best}일</text>
 {"".join(legend)}
 <text x="{W - PAD_X}" y="{H - 78}" class="s" text-anchor="end">← 1년의 흐름 →</text>
 <rect x="{W - PAD_X - 34}" y="{H - 62}" width="34" height="34" fill="#b0352b" rx="3"/>
-<text x="{W - PAD_X - 17}" y="{H - 40}" text-anchor="middle" style="font-family:Georgia,serif;font-size:13px;fill:#f4eee2;font-weight:700">{login[:4]}</text>
+<text x="{W - PAD_X - 17}" y="{H - 40}" text-anchor="middle" style="font-family:Georgia,serif;font-size:11px;fill:#f4eee2;font-weight:700">{login[:3]}</text>
 </svg>'''
 
 
